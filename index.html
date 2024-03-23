@@ -388,8 +388,11 @@
       <form action="https://api.staticforms.xyz/submit" method="post" id="contact" class="php-email-form mt-4">
         <input type="hidden" name="accessKey" value="cacab84d-d506-4cd1-97cc-49d552368847">
         <input type="hidden" name="subject" value="Contact Form Submission">
-        <input type="hidden" name="redirectTo" value="https://pyth3rex.github.io">
+        <input type="hidden" name="redirectTo" value="https://pyth3rex.github.io/sucess.html">
       
+        <!-- If we receive data in this field submission will be ignored -->
+        <input type="text" name="honeypot" style="display: none;"> <!-- Optional -->
+
         <div class="row">
           <div class="col-md-6 form-group">
             <input type="text" name="name" class="form-control" id="name" placeholder="Your Name" required>
