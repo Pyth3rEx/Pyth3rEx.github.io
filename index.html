@@ -407,9 +407,8 @@
         <input type="hidden" name="subject" value="Contact Form Submission">
         <input type="hidden" name="redirectTo" value="https://pyth3rex.github.io/sucess.html">
       
-        <!-- If we receive data in this field submission will be ignored -->
         <input type="text" name="honeypot" style="display: none;"> <!-- Optional -->
-
+      
         <div class="row">
           <div class="col-md-6 form-group">
             <input type="text" name="name" class="form-control" id="name" placeholder="Your Name" required>
@@ -418,18 +417,22 @@
             <input type="email" class="form-control" name="email" id="email" placeholder="Your Email" required>
           </div>
         </div>
+      
         <div class="form-group mt-3">
           <textarea class="form-control" name="message" rows="5" placeholder="Message" required></textarea>
         </div>
-        <!-- reCAPTCHA widget -->
-        <div class="g-recaptcha" data-sitekey="6LcrbaIpAAAAAE7PpauMQbcYHmjQoRoMJEvVelX1"></div>
+      
+        <div class="form-group mt-3 d-flex justify-content-between align-items-center flex-wrap">
+          <div class="g-recaptcha" data-sitekey="6LcO-hQrAAAAAAtPfZqR0dYCpltc2bzaaiN0qNs4"></div>
+          <button type="submit" class="btn btn-primary mt-3 mt-md-0">Send Message</button>
+        </div>
+      
         <div class="my-3">
           <div class="loading">Loading</div>
           <div class="error-message"></div>
           <div class="sent-message">Your message has been sent. Thank you!</div>
         </div>
-        <div class="text-center"><button type="submit" class="btn btn-primary">Send Message</button></div>
-      </form>
+      </form>      
       
 
     </div>
