@@ -380,7 +380,7 @@ h1.page-title {
   border-left: 2px solid $bg-border;
   padding-left: 1rem;
 
-  @media (min-width: 1200px) {
+  @media (width >= 1200px) {
     display: block;
   }
 
@@ -529,6 +529,7 @@ pre {
   .kc, .kd, .kr, .no, .kt                 { color: #66d9ef; }
   .m, .mb, .mx, .mf, .mh, .il, .mi, .mo  { color: #ae81ff; }
   .sc, .se, .ss                            { color: #ae81ff; }
+
   .s, .sa, .dl, .s1, .s2, .sb, .sd,
   .sh, .si, .sx                            { color: #e6db74; }
   .na, .nc, .nd, .ne, .nf, .fm            { color: #a6e22e; }
