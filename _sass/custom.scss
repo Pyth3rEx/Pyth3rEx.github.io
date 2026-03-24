@@ -397,6 +397,28 @@ h1.page-title {
   }
 }
 
+// ── Task list (checklist) ───────────────────────────────────────────────────────
+.post-content ul.task-list {
+  list-style: none;
+  padding-left: 0;
+
+  li input[type="checkbox"] {
+    appearance: none;
+    width: 0.75rem;
+    height: 0.75rem;
+    border: 1px solid $text-muted;
+    margin-right: 0.6rem;
+    vertical-align: middle;
+    cursor: default;
+    flex-shrink: 0;
+
+    &:checked {
+      background: $accent;
+      border-color: $accent;
+    }
+  }
+}
+
 // ── Code ───────────────────────────────────────────────────────────────────────
 code, kbd, samp, tt {
   font-family: $font;
