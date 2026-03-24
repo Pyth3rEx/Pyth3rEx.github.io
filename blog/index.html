@@ -18,7 +18,7 @@ permalink: /blog/
         {% unless seen_series contains post.series %}
           {% assign seen_series = seen_series | push: post.series %}
           {% assign series_posts = site.posts | where: "series", post.series | sort: "series_part" %}
-          <details class="series-block" open>
+          <details class="series-block">
             <summary class="series-header">
               <span class="series-label">series</span>
               <span class="series-title">{{ post.series }}</span>
