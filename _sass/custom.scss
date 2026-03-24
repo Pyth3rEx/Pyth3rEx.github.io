@@ -381,6 +381,26 @@ pre {
   }
 }
 
+// ── Copy button ────────────────────────────────────────────────────────────────
+.copy-btn {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background: $bg-border;
+  color: $text-muted;
+  border: 1px solid $bg-border;
+  font-family: $font;
+  font-size: 0.75rem;
+  padding: 0.2rem 0.5rem;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s ease, color 0.15s ease;
+
+  &:hover { color: $text; }
+}
+
+.highlight:hover .copy-btn { opacity: 1; }
+
 // ── Syntax highlighting (Monokai Sublime) ──────────────────────────────────────
 .highlight {
   background: $bg-secondary;
