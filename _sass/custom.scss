@@ -572,7 +572,7 @@ summary.series-header {
 }
 
 .find-match {
-  background: rgb(204 34 0 / 25%);
+  background: rgba(204, 34, 0, 0.25);
   color: $text;
   border-radius: 1px;
 }
@@ -595,7 +595,7 @@ summary.series-header {
   border-left: 2px solid $bg-border;
   padding-left: 1rem;
 
-  @media (width >= 1200px) {
+  @media (min-width: 1200px) {
     display: block;
   }
 
