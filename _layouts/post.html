@@ -12,21 +12,29 @@ layout: default
   <nav class="post-toc" id="post-toc" aria-label="Table of contents"></nav>
   {% endif %}
 
-  <div class="post-content">
+  <div class="post-find" id="post-find" role="search" aria-label="Find in post" style="display:none">
+    <input class="post-find-input" id="post-find-input" type="search" placeholder="find in post..." autocomplete="off" spellcheck="false">
+    <span class="post-find-count" id="post-find-count"></span>
+    <button class="post-find-btn" id="post-find-prev" aria-label="Previous match">↑</button>
+    <button class="post-find-btn" id="post-find-next" aria-label="Next match">↓</button>
+    <button class="post-find-btn post-find-close" id="post-find-close" aria-label="Close">✕</button>
+  </div>
+
+  <div class="post-content" id="post-content">
     {{ content }}
   </div>
 
   <nav class="post-nav">
     <a class="post-back" href="{{ '/blog' | relative_url }}">&larr; Back</a>
     <div class="post-nav-siblings">
-      {% if page.previous.url %}
-        <a class="prev" href="{{ page.previous.url | relative_url }}">&larr; {{ page.previous.title }}</a>
+      {% if page.next.url %}
+        <a class="prev" href="{{ page.next.url | relative_url }}">&larr; {{ page.next.title }}</a>
       {% endif %}
       {% if page.previous.url and page.next.url %}
         <span class="nav-sep">|</span>
       {% endif %}
-      {% if page.next.url %}
-        <a class="next" href="{{ page.next.url | relative_url }}">{{ page.next.title }} &rarr;</a>
+      {% if page.previous.url %}
+        <a class="next" href="{{ page.previous.url | relative_url }}">{{ page.previous.title }} &rarr;</a>
       {% endif %}
     </div>
   </nav>

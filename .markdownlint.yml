@@ -1,10 +1,11 @@
 default: true
 
-# Line length — allow longer lines (URLs, tables)
+# Line length — allow longer lines (URLs, tables, list items)
 MD013:
-  line_length: 120
+  line_length: 160
   code_blocks: false
   tables: false
+  headings: false
 
 # Inline HTML — allowed (Jekyll front matter, custom elements)
 MD033: false
@@ -17,3 +18,6 @@ MD029: false
 
 # Multiple h1 headings — intentional section structure
 MD025: false
+
+# Emphasis as heading — bold used for stylistic effect, not structure
+MD036: false
