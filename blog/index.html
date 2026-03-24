@@ -1,0 +1,22 @@
+---
+layout: default
+title: Blog
+permalink: /blog/
+---
+
+<h1 class="page-title">Blog</h1>
+
+<div class="post-list">
+  {% if site.posts.size == 0 %}
+    <p class="empty">// no posts yet</p>
+  {% else %}
+    <ul>
+      {% for post in site.posts %}
+        <li>
+          <span class="post-date">{{ post.date | date: "%Y-%m-%d" }}</span>
+          <a href="{{ post.url | relative_url }}">{{ post.title }}</a>
+        </li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+</div>

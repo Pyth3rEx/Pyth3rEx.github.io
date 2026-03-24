@@ -1,0 +1,19 @@
+title: "Pyth3rEx"
+description: ""
+baseurl: ""
+url: "https://Pyth3rEx.github.io"
+
+theme: minima
+permalink: /blog/:year/:month/:day/:title/
+
+plugins:
+  - jekyll-feed
+  - jekyll-seo-tag
+
+# Exclude from build
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - README.md
+  - vendor/
+  - .bundle/
