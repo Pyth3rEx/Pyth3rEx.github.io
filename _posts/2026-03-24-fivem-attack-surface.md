@@ -10,12 +10,15 @@ Reframe the threat model: most owners think security = anticheat. A FiveM server
 ---
 # Section 1 — Unvalidated Server Events
 
-Events: the basis of matter... No really!
+FiveM scripts are typically split into two layers: server-side and client-side. Because the server
+runs in a controlled environment, it is easy to assume it is also a safe one — isolated from threat
+actors and untrusted input. That assumption is where things break down.
 
-FiveM scripts are pieces of code that are (usualy) split in two: server-side and client-side. While the server side is away from clients it can easely be thought of as a safe environement, away from threat actors and user-induced bugs; same cannot be said for the client code, that runs directly on the client machine and is therefore inherently unsafe.
-Events are the basis of communication between these two layers, alowing the client and the server to speak relatively freely (based on common contracts).
+The two layers communicate through events. A client triggers a named event; the server listens for
+it and acts. The problem is that **any connected client can fire any registered server event by
+name**, with any arguments they choose.
 
-Let's take this example:
+Consider this:
 ```lua
 -- server.lua
 RegisterNetEvent('bank:withdraw')
@@ -24,7 +27,15 @@ AddEventHandler('bank:withdraw', function(amount)
     removeMoney(src, amount)
 end)
 ```
-We can see here
+We can see here a simple withdrawing function running the server-side. This snippet can be called by the client in a functions that looks like:
+```lua
+-- client.lua
+
+-- Function called when the player confirms a withdrawal in the banking UI
+function OnWithdrawConfirmed(amount)
+    TriggerServerEvent('bank:withdraw', amount)
+end
+```
 
 - How the event system works: any connected client can trigger any registered server event by name
 - What gets abused: economy manipulation, privilege escalation, state corruption
