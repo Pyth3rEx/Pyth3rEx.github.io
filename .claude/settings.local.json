@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ruby --version)",
+      "Bash(choco install:*)",
+      "Bash(gem --version)",
+      "Bash(bundle --version)",
+      "WebSearch",
+      "WebFetch(domain:nullpt.rs)",
+      "WebFetch(domain:docs.fivem.net)",
+      "WebFetch(domain:blog.back.engineering)"
+    ]
+  }
+}

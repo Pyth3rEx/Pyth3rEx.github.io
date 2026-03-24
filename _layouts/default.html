@@ -24,6 +24,9 @@
       <nav class="site-nav">
         <a href="{{ '/blog' | relative_url }}">[blog]</a>
         <a href="{{ '/about' | relative_url }}">[about]</a>
+        {% if page.url == '/blog/' %}
+        <input class="site-search" id="site-search" type="search" placeholder="/ search" autocomplete="off" spellcheck="false" aria-label="Search posts">
+        {% endif %}
       </nav>
     </div>
   </header>
@@ -33,6 +36,212 @@
       {{ content }}
     </div>
   </main>
+
+  <button class="back-to-top" id="back-to-top" aria-label="Back to top">↑</button>
+
+  <script>
+    document.querySelectorAll('div.highlight').forEach(function(block) {
+      var btn = document.createElement('button');
+      btn.className = 'copy-btn';
+      btn.textContent = 'copy';
+      block.style.position = 'relative';
+      block.appendChild(btn);
+      btn.addEventListener('click', function() {
+        var code = block.querySelector('code') || block.querySelector('pre');
+        navigator.clipboard.writeText(code.innerText).then(function() {
+          btn.textContent = 'copied';
+          setTimeout(function() { btn.textContent = 'copy'; }, 1500);
+        });
+      });
+    });
+  </script>
+
+  <script>
+    var toc = document.getElementById('post-toc');
+    if (toc) {
+      var headings = document.querySelectorAll('.post-content h1, .post-content h2');
+      if (headings.length > 0) {
+        var ul = document.createElement('ul');
+        var tocLinks = [];
+        headings.forEach(function(h) {
+          var li = document.createElement('li');
+          li.className = 'toc-' + h.tagName.toLowerCase();
+          var a = document.createElement('a');
+          a.href = '#' + h.id;
+          a.textContent = h.textContent;
+          a.dataset.id = h.id;
+          li.appendChild(a);
+          ul.appendChild(li);
+          tocLinks.push(a);
+        });
+        toc.appendChild(ul);
+
+        function updateActive() {
+          var scrollPos = window.scrollY + 80;
+          var current = null;
+          headings.forEach(function(h) {
+            if (h.offsetTop <= scrollPos) current = h.id;
+          });
+          tocLinks.forEach(function(a) {
+            a.classList.toggle('toc-active', a.dataset.id === current);
+          });
+        }
+        window.addEventListener('scroll', updateActive);
+        updateActive();
+      }
+    }
+
+    var backToTop = document.getElementById('back-to-top');
+    if (backToTop) {
+      window.addEventListener('scroll', function() {
+        backToTop.classList.toggle('visible', window.scrollY > 200);
+      });
+      backToTop.addEventListener('click', function() {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+    }
+  </script>
+
+  <script>
+    (function() {
+      var findBar    = document.getElementById('post-find');
+      var findInput  = document.getElementById('post-find-input');
+      var findCount  = document.getElementById('post-find-count');
+      var btnPrev    = document.getElementById('post-find-prev');
+      var btnNext    = document.getElementById('post-find-next');
+      var btnClose   = document.getElementById('post-find-close');
+      var content    = document.getElementById('post-content');
+      if (!findBar || !content) return;
+
+      var matches = [];
+      var current = -1;
+      var originalHTML = content.innerHTML;
+
+      function openFind() {
+        findBar.style.display = 'flex';
+        findInput.focus();
+        findInput.select();
+      }
+
+      function closeFind() {
+        findBar.style.display = 'none';
+        content.innerHTML = originalHTML;
+        matches = [];
+        current = -1;
+        findCount.textContent = '';
+      }
+
+      function escapeRe(s) {
+        return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      }
+
+      function highlight(q) {
+        content.innerHTML = originalHTML;
+        matches = [];
+        current = -1;
+        findCount.textContent = '';
+        if (!q) return;
+
+        var re = new RegExp('(' + escapeRe(q) + ')', 'gi');
+        var walker = document.createTreeWalker(content, NodeFilter.SHOW_TEXT, {
+          acceptNode: function(node) {
+            var p = node.parentNode;
+            if (p && (p.tagName === 'SCRIPT' || p.tagName === 'STYLE')) return NodeFilter.FILTER_REJECT;
+            return node.nodeValue && re.test(node.nodeValue) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
+          }
+        }, false);
+
+        var nodes = [];
+        while (walker.nextNode()) { re.lastIndex = 0; nodes.push(walker.currentNode); }
+
+        nodes.forEach(function(node) {
+          re.lastIndex = 0;
+          var frag = document.createDocumentFragment();
+          var last = 0;
+          var m;
+          while ((m = re.exec(node.nodeValue)) !== null) {
+            if (m.index > last) frag.appendChild(document.createTextNode(node.nodeValue.slice(last, m.index)));
+            var mark = document.createElement('mark');
+            mark.className = 'find-match';
+            mark.textContent = m[0];
+            frag.appendChild(mark);
+            matches.push(mark);
+            last = re.lastIndex;
+          }
+          if (last < node.nodeValue.length) frag.appendChild(document.createTextNode(node.nodeValue.slice(last)));
+          node.parentNode.replaceChild(frag, node);
+        });
+
+        findCount.textContent = matches.length ? '1 / ' + matches.length : 'no results';
+        if (matches.length) goTo(0);
+      }
+
+      function goTo(idx) {
+        if (!matches.length) return;
+        if (current >= 0) matches[current].classList.remove('find-match-active');
+        current = (idx + matches.length) % matches.length;
+        matches[current].classList.add('find-match-active');
+        matches[current].scrollIntoView({ behavior: 'smooth', block: 'center' });
+        findCount.textContent = (current + 1) + ' / ' + matches.length;
+      }
+
+      findInput.addEventListener('input', function() { highlight(this.value.trim()); });
+      findInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') { e.shiftKey ? goTo(current - 1) : goTo(current + 1); }
+        if (e.key === 'Escape') closeFind();
+      });
+      btnPrev.addEventListener('click', function() { goTo(current - 1); });
+      btnNext.addEventListener('click', function() { goTo(current + 1); });
+      btnClose.addEventListener('click', closeFind);
+
+      document.addEventListener('keydown', function(e) {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'f' && content) {
+          e.preventDefault();
+          openFind();
+        }
+        if (e.key === 'Escape' && findBar.style.display !== 'none') closeFind();
+      });
+    }());
+  </script>
+
+  <script>
+    var searchInput = document.getElementById('site-search');
+    if (searchInput) {
+      searchInput.addEventListener('input', function() {
+        var q = this.value.trim().toLowerCase();
+        var feed = document.getElementById('post-feed');
+        if (!feed) return;
+        var noResults = document.getElementById('search-no-results');
+        var visibleCount = 0;
+
+        feed.querySelectorAll('.post-card').forEach(function(card) {
+          var title = (card.querySelector('.post-card-title') || card).textContent.toLowerCase();
+          var excerpt = (card.querySelector('.post-card-excerpt') || card).textContent.toLowerCase();
+          var match = !q || title.includes(q) || excerpt.includes(q);
+          card.style.display = match ? '' : 'none';
+          if (match) visibleCount++;
+        });
+
+        feed.querySelectorAll('details.series-block').forEach(function(block) {
+          var seriesTitle = (block.querySelector('.series-title') || block).textContent.toLowerCase();
+          var titleMatch = !q || seriesTitle.includes(q);
+          var anyPartMatch = false;
+
+          block.querySelectorAll('.series-part').forEach(function(part) {
+            var match = titleMatch || !q || part.textContent.toLowerCase().includes(q);
+            part.style.display = match ? '' : 'none';
+            if (match) anyPartMatch = true;
+          });
+
+          var show = !q || titleMatch || anyPartMatch;
+          block.style.display = show ? '' : 'none';
+          if (show) visibleCount++;
+        });
+
+        if (noResults) noResults.style.display = visibleCount === 0 && q ? '' : 'none';
+      });
+    }
+  </script>
 
   <footer class="site-footer">
     <span>&copy; {{ site.time | date: '%Y' }} {{ site.title }}</span>

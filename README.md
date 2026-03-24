@@ -25,6 +25,10 @@ Create a file in `_posts/` named `YYYY-MM-DD-title-slug.md`:
 layout: post
 title: "Post Title"
 date: 2026-01-01
+toc: false
+series: "XYZ Security"
+series_part: 1
+tags: [security, osint, research]
 ---
 
 Post content here. Markdown supported.
