@@ -62,7 +62,8 @@ the client call is wrapped in checks at the client level:
 None of those checks exist on the server. They live on the client, where the attacker already has full
 control.
 
-Now let's put on our hacker hoodies and think red: what happens if we call the event directly, bypassing the UI entirely?
+Now let's put on our hacker hoodies and think red: what happens if we call the event directly,
+bypassing the UI entirely?
 
 > **Note:** The examples below are intentionally vague. The goal is not a hacking tutorial — these are
 > well-known techniques in the offensive world, but the focus here is awareness, not execution.
@@ -120,7 +121,9 @@ Logging every action and reviewing it after the fact is not security — it is a
 questions should be asked in real time. A player running more than five transactions per minute? Flag
 it. An account receiving transfers from twenty different players in thirty seconds? Flag it.
 
-> **Note:** With the growth of AI and the rise of consumer-level big data systems, it'd be very interesting to see what can be done with the mass treatment of logs across servers: training AI models to scan logs for anomalies the same way it's done in tax offices to hunt money laundering.
+> **Note:** With the growth of AI and the rise of consumer-level big data systems, it'd be very
+> interesting to see what can be done with the mass treatment of logs across servers: training AI
+> models to scan logs for anomalies the same way it's done in tax offices to hunt money laundering.
 
 ---
 # Section 2 — The NUI / Web Layer
@@ -279,18 +282,29 @@ you are a data controller. The moment real money changes hands, you are operatin
 service. Most server owners have never thought about this. Most will keep not thinking about it
 until they receive something that is not a cheat report.
 
-In a future post, we will cover what a breach actually costs — legally, financially, and personally. If this post
-reached someone running a server, send it to them. Better read a blog post than receive a report from the IRS... or worse.
+In a future post, we will cover what a breach actually costs — legally, financially, and personally.
+If this post reached someone running a server, send it to them. Better read a blog post than
+receive a report from the IRS... or worse.
 
 ---
 # Notes
 
-[^1]: In networking and security, "*service*" is a broad term. FiveM scripts can reasonably be described as a service running inside a browser (Chromium/NUI), running on a network stack (FiveM), running on a game engine (RAGE).
+[^1]: In networking and security, "*service*" is a broad term. FiveM scripts can reasonably be
+    described as a service running inside a browser (Chromium/NUI), running on a network stack
+    (FiveM), running on a game engine (RAGE).
 
-[^2]: This can go further than it looks. A common pattern is routing stolen funds through a temporary account, then converting them to placeable in-game objects to break the audit trail. In some cases this technique has been used to frame other players — the logs showed them receiving large wire transfers, leading server staff to believe they were responsible.
+[^2]: This can go further than it looks. A common pattern is routing stolen funds through a
+    temporary account, then converting them to placeable in-game objects to break the audit trail.
+    In some cases this technique has been used to frame other players — the logs showed them
+    receiving large wire transfers, leading server staff to believe they were responsible.
 
-[^3]: This also goes for performance. Offloading the client to the max usually helps with client-side FPS.
+[^3]: This also goes for performance. Offloading the client to the max usually helps with
+    client-side FPS.
 
-[^4]: Anomaly detection at the event level is underused in FiveM. A handler that rejects more than it accepts is a signal worth surfacing — especially on high-value events like transfers or inventory mutations.
+[^4]: Anomaly detection at the event level is underused in FiveM. A handler that rejects more than
+    it accepts is a signal worth surfacing — especially on high-value events like transfers or
+    inventory mutations.
 
-[^5]: In languages where `=` is assignment and `==` is comparison — C, JavaScript, PHP — writing the constant on the left turns an accidental `=` into a compile-time or runtime error rather than a silent bug. The pattern originates there; in Lua it is purely a readability convention.
+[^5]: In languages where `=` is assignment and `==` is comparison — C, JavaScript, PHP — writing
+    the constant on the left turns an accidental `=` into a compile-time or runtime error rather
+    than a silent bug. The pattern originates there; in Lua it is purely a readability convention.
