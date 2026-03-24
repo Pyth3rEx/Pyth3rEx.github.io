@@ -103,6 +103,108 @@
   </script>
 
   <script>
+    (function() {
+      var findBar    = document.getElementById('post-find');
+      var findInput  = document.getElementById('post-find-input');
+      var findCount  = document.getElementById('post-find-count');
+      var btnPrev    = document.getElementById('post-find-prev');
+      var btnNext    = document.getElementById('post-find-next');
+      var btnClose   = document.getElementById('post-find-close');
+      var content    = document.getElementById('post-content');
+      if (!findBar || !content) return;
+
+      var matches = [];
+      var current = -1;
+      var originalHTML = content.innerHTML;
+
+      function openFind() {
+        findBar.style.display = 'flex';
+        findInput.focus();
+        findInput.select();
+      }
+
+      function closeFind() {
+        findBar.style.display = 'none';
+        content.innerHTML = originalHTML;
+        matches = [];
+        current = -1;
+        findCount.textContent = '';
+      }
+
+      function escapeRe(s) {
+        return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      }
+
+      function highlight(q) {
+        content.innerHTML = originalHTML;
+        matches = [];
+        current = -1;
+        findCount.textContent = '';
+        if (!q) return;
+
+        var re = new RegExp('(' + escapeRe(q) + ')', 'gi');
+        var walker = document.createTreeWalker(content, NodeFilter.SHOW_TEXT, {
+          acceptNode: function(node) {
+            var p = node.parentNode;
+            if (p && (p.tagName === 'SCRIPT' || p.tagName === 'STYLE')) return NodeFilter.FILTER_REJECT;
+            return node.nodeValue && re.test(node.nodeValue) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
+          }
+        }, false);
+
+        var nodes = [];
+        while (walker.nextNode()) { re.lastIndex = 0; nodes.push(walker.currentNode); }
+
+        nodes.forEach(function(node) {
+          re.lastIndex = 0;
+          var frag = document.createDocumentFragment();
+          var last = 0;
+          var m;
+          while ((m = re.exec(node.nodeValue)) !== null) {
+            if (m.index > last) frag.appendChild(document.createTextNode(node.nodeValue.slice(last, m.index)));
+            var mark = document.createElement('mark');
+            mark.className = 'find-match';
+            mark.textContent = m[0];
+            frag.appendChild(mark);
+            matches.push(mark);
+            last = re.lastIndex;
+          }
+          if (last < node.nodeValue.length) frag.appendChild(document.createTextNode(node.nodeValue.slice(last)));
+          node.parentNode.replaceChild(frag, node);
+        });
+
+        findCount.textContent = matches.length ? '1 / ' + matches.length : 'no results';
+        if (matches.length) goTo(0);
+      }
+
+      function goTo(idx) {
+        if (!matches.length) return;
+        if (current >= 0) matches[current].classList.remove('find-match-active');
+        current = (idx + matches.length) % matches.length;
+        matches[current].classList.add('find-match-active');
+        matches[current].scrollIntoView({ behavior: 'smooth', block: 'center' });
+        findCount.textContent = (current + 1) + ' / ' + matches.length;
+      }
+
+      findInput.addEventListener('input', function() { highlight(this.value.trim()); });
+      findInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') { e.shiftKey ? goTo(current - 1) : goTo(current + 1); }
+        if (e.key === 'Escape') closeFind();
+      });
+      btnPrev.addEventListener('click', function() { goTo(current - 1); });
+      btnNext.addEventListener('click', function() { goTo(current + 1); });
+      btnClose.addEventListener('click', closeFind);
+
+      document.addEventListener('keydown', function(e) {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'f' && content) {
+          e.preventDefault();
+          openFind();
+        }
+        if (e.key === 'Escape' && findBar.style.display !== 'none') closeFind();
+      });
+    }());
+  </script>
+
+  <script>
     var searchInput = document.getElementById('site-search');
     if (searchInput) {
       searchInput.addEventListener('input', function() {

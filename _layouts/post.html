@@ -12,7 +12,15 @@ layout: default
   <nav class="post-toc" id="post-toc" aria-label="Table of contents"></nav>
   {% endif %}
 
-  <div class="post-content">
+  <div class="post-find" id="post-find" role="search" aria-label="Find in post" style="display:none">
+    <input class="post-find-input" id="post-find-input" type="search" placeholder="find in post..." autocomplete="off" spellcheck="false">
+    <span class="post-find-count" id="post-find-count"></span>
+    <button class="post-find-btn" id="post-find-prev" aria-label="Previous match">↑</button>
+    <button class="post-find-btn" id="post-find-next" aria-label="Next match">↓</button>
+    <button class="post-find-btn post-find-close" id="post-find-close" aria-label="Close">✕</button>
+  </div>
+
+  <div class="post-content" id="post-content">
     {{ content }}
   </div>
 
