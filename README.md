@@ -40,7 +40,7 @@ Push to `main` — the GitHub Actions workflow (`.github/workflows/jekyll.yml`) 
 
 ## Structure
 
-```
+```text
 _layouts/       Layout overrides (default.html, post.html)
 _sass/          Custom SCSS (dark theme)
 assets/css/     Stylesheet entry point

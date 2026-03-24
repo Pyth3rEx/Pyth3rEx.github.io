@@ -1,15 +1,15 @@
 // ── Design tokens ──────────────────────────────────────────────────────────────
-$bg:           #0f0f0f;
+$bg: #0f0f0f;
 $bg-secondary: #1a1a1a;
-$bg-border:    #252525;
-$text:         #d4d4d4;
-$text-muted:   #666666;
-$accent:       #cc2200;
-$accent-hover: #ff3300;
-$font:         'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
-$font-size:    15px;
-$line-height:  1.7;
-$max-width:    720px;
+$bg-border: #252525;
+$text: #d4d4d4;
+$text-muted: #666;
+$accent: #c20;
+$accent-hover: #f30;
+$font: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+$font-size: 15px;
+$line-height: 1.7;
+$max-width: 720px;
 
 // ── Reset & base ───────────────────────────────────────────────────────────────
 *, *::before, *::after {
@@ -188,6 +188,13 @@ h1.page-title {
     font-size: 0.85rem;
   }
 
+  .post-read-time {
+    color: $text-muted;
+    font-size: 0.85rem;
+
+    &::before { content: '— '; }
+  }
+
   .post-content {
     h1, h2, h3, h4, h5, h6 {
       color: $text;
@@ -260,7 +267,10 @@ h1.page-title {
     font-size: 0.875rem;
     gap: 1rem;
 
-    .next { margin-left: auto; text-align: right; }
+    .next {
+      margin-left: auto;
+      text-align: right;
+    }
   }
 }
 
@@ -296,5 +306,8 @@ pre {
   border-left: 2px solid $accent;
   margin: 1.5rem 0;
 
-  pre { border-left: none; margin: 0; }
+  pre {
+    border-left: none;
+    margin: 0;
+  }
 }
