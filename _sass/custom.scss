@@ -377,14 +377,33 @@ pre {
   }
 }
 
-// ── Highlight overrides ────────────────────────────────────────────────────────
+// ── Syntax highlighting (Monokai Sublime) ──────────────────────────────────────
 .highlight {
   background: $bg-secondary;
   border-left: 2px solid $accent;
   margin: 1.5rem 0;
+  color: #fff;
 
   pre {
     border-left: none;
     margin: 0;
+    background: $bg-secondary;
   }
+
+  table td { padding: 5px; }
+  table pre { margin: 0; }
+
+  .c, .ch, .cd, .cpf, .cm, .cp, .c1, .cs { color: #75715e; }
+  .err, .gr, .gt                           { color: #960050; }
+  .k, .kv, .kn, .kp, .ow                  { color: #f92672; }
+  .kc, .kd, .kr, .no, .kt                 { color: #66d9ef; }
+  .m, .mb, .mx, .mf, .mh, .il, .mi, .mo  { color: #ae81ff; }
+  .sc, .se, .ss                            { color: #ae81ff; }
+  .s, .sa, .dl, .s1, .s2, .sb, .sd,
+  .sh, .si, .sx                            { color: #e6db74; }
+  .na, .nc, .nd, .ne, .nf, .fm            { color: #a6e22e; }
+  .nt, .o                                  { color: #f92672; }
+  .gh, .gp                                 { color: #999; }
+  .ge                                      { font-style: italic; }
+  .gs, .ges                                { font-weight: bold; }
 }
