@@ -16,6 +16,14 @@ $max-width: 720px;
   box-sizing: border-box;
 }
 
+h1, h2, h3, h4, h5, h6 {
+  scroll-margin-top: 3.5rem;
+}
+
+sup[id] {
+  scroll-margin-top: 10rem;
+}
+
 html {
   font-size: $font-size;
 }
@@ -356,6 +364,36 @@ h1.page-title {
     }
 
     &:visited { color: $accent; }
+  }
+}
+
+// ── Table of contents ──────────────────────────────────────────────────────────
+.post-toc {
+  border-left: 2px solid $bg-border;
+  padding: 0.75rem 0 0.75rem 1.25rem;
+  margin-bottom: 2.5rem;
+  font-size: 0.825rem;
+
+  ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  li {
+    margin: 0.3rem 0;
+
+    &.toc-h2 { padding-left: 1rem; }
+  }
+
+  a {
+    color: $text-muted;
+    text-decoration: none;
+    transition: color 0.15s ease;
+
+    &:hover { color: $accent; }
+    &:visited { color: $text-muted; }
+    &:visited:hover { color: $accent; }
   }
 }
 
