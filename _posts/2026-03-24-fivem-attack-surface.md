@@ -153,7 +153,7 @@ look at what surrounds it.
 [nmap scan, other services, open ports]
 
 ## Permissions and infrastructure
-[roles, permissions, default passwords and unprotected DBs]
+[roles, permissions, default passwords and unprotectedmaybe DBs]
 
 ## Bare Metal
 [untrusted hosting platforms, physical attacks]
@@ -272,6 +272,16 @@ Anticheat is discussed endlessly; the event handler that moves money is not.
 
 Reframe: the gap between exposed and defensible is attention, not expertise. The fixes are a few
 lines of Lua. Most servers aren’t hacked — they’re asked politely, and they comply.
+
+There is one thing this post has not touched: consequences. Not in-game ones — real ones. Every server
+collects data. IPs, identifiers, transaction records, chat logs. The moment a player connects,
+you are a data controller. The moment real money changes hands, you are operating a financial
+service. Most server owners have never thought about this. Most will keep not thinking about it
+until they receive something that is not a cheat report.
+
+In a future post, we will cover what a breach actually costs — legally, financially, and personally. If this post
+reached someone running a server, send it to them. Better read a blog post than receive a report from the IRS... or worse.
+
 ---
 # Notes
 
