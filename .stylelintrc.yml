@@ -22,5 +22,8 @@ rules:
   # Declaration block: no required empty line before
   declaration-empty-line-before: null
 
+  # Descending specificity false positives with SCSS nesting
+  no-descending-specificity: null
+
   # Allow // single-line comments
   scss/double-slash-comment-empty-line-before: null
