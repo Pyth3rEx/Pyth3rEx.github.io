@@ -19,6 +19,7 @@ owners frame security as anticheat. A FiveM server is a networked application st
 treated like one.
 
 ---
+
 # Section 1 — Unvalidated Server Events
 
 FiveM scripts are typically split into two layers: *server-side* and *client-side*. Client code runs on
@@ -31,10 +32,10 @@ The two layers communicate through events. A client triggers a named event; the 
 acts. The problem is that **any connected client can fire any registered server event by name**, with any
 arguments they choose.
 
-
 ## Case study
 
 Consider this:
+
 ```lua
 -- server.lua
 RegisterNetEvent('bank:withdraw')
@@ -43,12 +44,14 @@ AddEventHandler('bank:withdraw', function(amount)
     removeMoney(src, amount)
 end)
 ```
+
 ```lua
 -- client.lua
 function OnWithdrawConfirmed(amount) -- Called when player confirms a withdrawal
     TriggerServerEvent('bank:withdraw', amount)
 end
 ```
+
 This pattern is common across free and paid scripts on the *CFx forums*, *GitHub*, and the *Tebex*
 marketplace. The server listens for the `bank:withdraw` event; when the client wants to withdraw, it fires
 the event with `amount` as the argument. The caller's identity (`src`) is resolved server-side, so that
@@ -87,6 +90,7 @@ single account. The logs flag nothing; every entry looks like a legitimate trans
 manual review would catch it, and only if the attacker was loud about it[^2].
 
 Server events **can be called from anywhere, by anyone, with any arguments**. Think about what that means in practice.
+
 - Your logs are empty
 - Your paid anticheat didn't trigger
 - Your staff doesn't realize
@@ -94,9 +98,10 @@ Server events **can be called from anywhere, by anyone, with any arguments**. Th
 This is full compromise; in red teaming, this would be a failed audit.
 
 ## Remediation
+
 👏 DON'T 👏 TRUST 👏 THE 👏 USER 👏
 
-### Client files should contain the bare minimum:
+### Client files should contain the bare minimum
 
 #### Scope your client code
 
@@ -126,6 +131,7 @@ it. An account receiving transfers from twenty different players in thirty secon
 > models to scan logs for anomalies the same way it's done in tax offices to hunt money laundering.
 
 ---
+
 # Section 2 — The NUI / Web Layer
 
 - NUI is a Chromium-based browser embedded in the client with a bridge to Lua
@@ -134,6 +140,7 @@ it. An account receiving transfers from twenty different players in thirty secon
 - Mitigation: textContent over innerHTML, Content Security Policy, minimal NUI bridge exposure
 
 ---
+
 # Section 3 — Supply Chain Risk from Community Scripts
 
 - Most servers run unaudited third-party code from GitHub/forums/resellers
@@ -143,6 +150,7 @@ it. An account receiving transfers from twenty different players in thirty secon
   patterns, prefer auditable repos, minimal OS permissions for the server process
 
 ---
+
 # Section 4 — The rest of the stack
 
 If you have read this far, you are probably already reconsidering some decisions. Good. But
@@ -153,15 +161,19 @@ is one of several things running on it. In this section we briefly step outside 
 look at what surrounds it.
 
 ## The server machine
+
 [nmap scan, other services, open ports]
 
 ## Permissions and infrastructure
+
 [roles, permissions, default passwords and unprotectedmaybe DBs]
 
 ## Bare Metal
+
 [untrusted hosting platforms, physical attacks]
 
 ---
+
 # Pre-Install Checklist
 
 - [ ] Audit all `PerformHttpRequest` calls — destination and payload
@@ -177,6 +189,7 @@ Each of these is covered in depth across the sections above.
 **TL;DR:** read the files before you trust them with your players.
 
 ---
+
 # For devs: Security as a Headspace (SaaH)
 
 The fixes are not complex. Here is the original `bank:withdraw` handler from section 1 with the four principles
@@ -251,6 +264,7 @@ A few things worth naming explicitly in both snippets:
   the rest, and any single failure sends the request straight to the bin.
 
 ---
+
 # Closing
 
 Low attacker bar, soft targets, simple fixes.
@@ -287,6 +301,7 @@ If this post reached someone running a server, send it to them. Better read a bl
 receive a report from the IRS... or worse.
 
 ---
+
 # Notes
 
 [^1]: In networking and security, "*service*" is a broad term. FiveM scripts can reasonably be

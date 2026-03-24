@@ -14,3 +14,6 @@ MD041: false
 
 # Ordered list style — allow any
 MD029: false
+
+# Multiple h1 headings — intentional section structure
+MD025: false
