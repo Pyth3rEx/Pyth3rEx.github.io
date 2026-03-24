@@ -34,6 +34,23 @@
     </div>
   </main>
 
+  <script>
+    document.querySelectorAll('div.highlight').forEach(function(block) {
+      var btn = document.createElement('button');
+      btn.className = 'copy-btn';
+      btn.textContent = 'copy';
+      block.style.position = 'relative';
+      block.appendChild(btn);
+      btn.addEventListener('click', function() {
+        var code = block.querySelector('code') || block.querySelector('pre');
+        navigator.clipboard.writeText(code.innerText).then(function() {
+          btn.textContent = 'copied';
+          setTimeout(function() { btn.textContent = 'copy'; }, 1500);
+        });
+      });
+    });
+  </script>
+
   <footer class="site-footer">
     <span>&copy; {{ site.time | date: '%Y' }} {{ site.title }}</span>
   </footer>
