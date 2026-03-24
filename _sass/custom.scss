@@ -88,6 +88,7 @@ a {
   a {
     color: $text-muted;
     font-size: 0.875rem;
+    transition: color 0.15s ease;
 
     &:hover {
       color: $accent;
@@ -324,6 +325,23 @@ h1.page-title {
       margin-left: auto;
       text-align: right;
     }
+  }
+
+  .post-back {
+    display: inline-block;
+    margin-top: 1.25rem;
+    font-size: 0.8rem;
+    color: $accent;
+    text-decoration: none;
+    letter-spacing: 0.04em;
+    transition: color 0.15s ease;
+
+    &:hover {
+      color: $accent-hover;
+      text-decoration: underline;
+    }
+
+    &:visited { color: $accent; }
   }
 }
 
