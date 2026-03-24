@@ -4,19 +4,35 @@ title: Blog
 permalink: /blog/
 ---
 
-<h1 class="page-title">Blog</h1>
+<div class="blog-header">
+  <p class="blog-tagline">Security research, tooling, and operational notes.</p>
+</div>
 
-<div class="post-list">
+<div class="post-feed">
   {% if site.posts.size == 0 %}
     <p class="empty">// no posts yet</p>
   {% else %}
-    <ul>
-      {% for post in site.posts %}
-        <li>
-          <span class="post-date">{{ post.date | date: "%Y-%m-%d" }}</span>
+    {% for post in site.posts %}
+      <article class="post-card">
+        <div class="post-card-meta">
+          <time>{{ post.date | date: "%Y-%m-%d" }}</time>
+          <span class="meta-sep">/</span>
+          {% assign words = post.content | number_of_words %}
+          {% assign minutes = words | divided_by: 200 %}
+          {% if minutes < 1 %}
+            <span>~1 min</span>
+          {% else %}
+            <span>~{{ minutes }} min</span>
+          {% endif %}
+        </div>
+        <h2 class="post-card-title">
           <a href="{{ post.url | relative_url }}">{{ post.title }}</a>
-        </li>
-      {% endfor %}
-    </ul>
+        </h2>
+        <p class="post-card-excerpt">
+          {{ post.excerpt | strip_html | truncatewords: 28 }}
+        </p>
+        <a class="post-card-read" href="{{ post.url | relative_url }}">read &rarr;</a>
+      </article>
+    {% endfor %}
   {% endif %}
 </div>
