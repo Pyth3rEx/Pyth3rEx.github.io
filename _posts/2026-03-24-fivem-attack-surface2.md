@@ -3,6 +3,8 @@ layout: post
 title: "FiveM Is a Real Attack Surface"
 date: 2026-03-24
 toc: true
+series: "FiveM Security"
+series_part: 2
 tags: [
   fivem, fivem-security, gta-roleplay, cfx,
   lua, lua-security, server-events, event-validation,

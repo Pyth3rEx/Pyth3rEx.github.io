@@ -26,6 +26,8 @@ layout: post
 title: "Post Title"
 date: 2026-01-01
 toc: false
+series: "XYZ Security"
+series_part: 1
 tags: [security, osint, research]
 ---
 
