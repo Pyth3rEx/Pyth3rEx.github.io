@@ -145,11 +145,104 @@ A short checklist (7 items) covering HTTP calls, event handlers, NUI innerHTML, 
 source integrity, and staging test.
 
 ---
+# For devs: Security as a Headspace (SaaH)
+
+The fixes are not complex. Here is the original `bank:withdraw` handler from section 1 with the four principles
+applied — the diff in code is small; the diff in exposure is everything.
+
+```lua
+-- server.lua
+RegisterNetEvent('bank:withdraw')
+AddEventHandler('bank:withdraw', function(amount)
+    local src = source
+
+    -- Type, sanity & context check
+    if "number" == type(amount) and 0 < amount and true == isPlayerAtBank(src) then
+      
+      -- Authorization
+      local balance = getPlayerBalance(src)
+      if nil ~= balance and balance >= amount then
+        
+        -- Perform the action
+        removeMoney(src, amount)
+      end
+    end
+
+    return
+end)
+```
+
+The same logic applies to `bank:transfer` — but now there are two amounts and two players to
+validate. Both must be real, both must be in range, and the sender must actually have the funds.
+Neither end of the transaction should be trusted.
+
+```lua
+-- server.lua
+RegisterNetEvent('bank:transfer')
+AddEventHandler('bank:transfer', function(target, amount)
+    local src = source
+
+    -- Type, sanity & target check
+    if "number" == type(amount) and 0 < amount and true == DoesPlayerExist(target) and src ~= target then
+
+      -- Authorization
+      local balance = getPlayerBalance(src)
+      if nil ~= balance and balance >= amount then
+
+        -- Perform the action
+        removeMoney(src, amount)
+        addMoney(target, amount)
+      end
+    end
+
+    return
+end)
+```
+
+Notice that `usr1` is gone — the server already knows who the sender is via `source`. Letting
+the client pass it as an argument is exactly the kind of thing that gets abused.
+
+A few things worth naming explicitly in both snippets:
+
+- **Default to negative.** The function does nothing unless every condition is met. No action, no
+  side effect, no response — just a silent `return`. The burden of proof is on the request, not
+  the rejection. That silent return is also the right place to raise a log flag: it is the default
+  path, and it should never be hit in normal operation.[^4]
+
+- **Yoda conditions.** Comparisons are written with the constant on the left: `"number" == type(amount)`
+  rather than `type(amount) == "number"`. In Lua the difference is stylistic — it signals that the
+  expected value is the reference point and the input is what gets tested against it.[^5]
+
+- **Layered validation.** The checks are not a single gate — they are a sequence of independent
+  filters, each answering a different question: *is this the right type? is the value in range? is
+  the player in the right context? does the authorization hold?* A bypass of one does not collapse
+  the rest, and any single failure sends the request straight to the bin.
+
+---
 # Closing
 
-Low attacker bar, soft targets, simple fixes. Reframe: the gap between exposed and defensible is attention, not
-expertise.
+Low attacker bar, soft targets, simple fixes.
 
+The threat model for a FiveM server is not exotic. There is no zero-day, no nation-state actor, no
+sophisticated toolchain. The attacker is usually a bored teenager with a Lua console and a list of
+event names pulled from your own client-side files — which they already have, because your client
+runs on their machine. The entry point is the trust you extended without meaning to.
+
+The reason most servers haven't been visibly compromised is not that they are secure — it is that
+they were either lucky, or they were hit and never noticed. An economy manipulation that stays
+within plausible bounds leaves no obvious trace. Logs that nobody reads might as well not exist.
+Anticheats operate at the game engine layer: they catch aimbots and movement exploits, script
+kiddie territory. They have no visibility into a crafted event payload crossing the network. A
+server owner pointing at their anticheat as a security posture is protecting the wrong perimeter.
+
+None of the mitigations in this post are novel. Server-side validation, minimal client scope,
+input sanitisation, anomaly logging — these are fundamentals. They appear in every secure
+development guide written in the last thirty years. The reason they are worth writing about in
+the context of FiveM is that the culture around it has never framed the server as an attack surface.
+Anticheat is discussed endlessly; the event handler that moves money is not.
+
+Reframe: the gap between exposed and defensible is attention, not expertise. The fixes are a few
+lines of Lua. Most servers aren’t hacked — they’re asked politely, and they comply.
 ---
 # Notes
 
@@ -158,3 +251,7 @@ expertise.
 [^2]: This can go further than it looks. A common pattern is routing stolen funds through a temporary account, then converting them to placeable in-game objects to break the audit trail. In some cases this technique has been used to frame other players — the logs showed them receiving large wire transfers, leading server staff to believe they were responsible.
 
 [^3]: This also goes for performance. Offloading the client to the max usually helps with client-side FPS.
+
+[^4]: Anomaly detection at the event level is underused in FiveM. A handler that rejects more than it accepts is a signal worth surfacing — especially on high-value events like transfers or inventory mutations.
+
+[^5]: In languages where `=` is assignment and `==` is comparison — C, JavaScript, PHP — writing the constant on the left turns an accidental `=` into a compile-time or runtime error rather than a silent bug. The pattern originates there; in Lua it is purely a readability convention.
