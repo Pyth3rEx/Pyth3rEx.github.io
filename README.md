@@ -25,6 +25,7 @@ Create a file in `_posts/` named `YYYY-MM-DD-title-slug.md`:
 layout: post
 title: "Post Title"
 date: 2026-01-01
+toc: false
 tags: [security, osint, research]
 ---
 
