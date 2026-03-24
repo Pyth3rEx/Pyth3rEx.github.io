@@ -140,10 +140,38 @@ it. An account receiving transfers from twenty different players in thirty secon
   patterns, prefer auditable repos, minimal OS permissions for the server process
 
 ---
+# Section 4 — The rest of the stack
+
+If you have read this far, you are probably already reconsidering some decisions. Good. But
+everything covered in sections 1 through 3 assumes the attacker is a player — someone who logged
+in, connected to your server, and is operating within the FiveM client. That is the comfortable
+threat model. The uncomfortable one is that your server is a machine on the internet, and FiveM
+is one of several things running on it. In this section we briefly step outside the game layer and
+look at what surrounds it.
+
+## The server machine
+[nmap scan, other services, open ports]
+
+## Permissions and infrastructure
+[roles, permissions, default passwords and unprotected DBs]
+
+## Bare Metal
+[untrusted hosting platforms, physical attacks]
+
+---
 # Pre-Install Checklist
 
-A short checklist (7 items) covering HTTP calls, event handlers, NUI innerHTML, hardcoded keys, commit history,
-source integrity, and staging test.
+- [ ] Audit all `PerformHttpRequest` calls — destination and payload
+- [ ] Check for hidden or catch-all `AddEventHandler` registrations
+- [ ] Search for hardcoded keys, tokens, and base64-encoded strings
+- [ ] Review NUI files for `innerHTML` with variable input
+- [ ] Verify commit history and source integrity
+- [ ] Confirm OS-level server permissions are minimal
+- [ ] Run on a staging server for 24h before production
+
+Each of these is covered in depth across the sections above.
+
+**TL;DR:** read the files before you trust them with your players.
 
 ---
 # For devs: Security as a Headspace (SaaH)
