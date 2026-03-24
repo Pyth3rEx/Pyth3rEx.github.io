@@ -25,5 +25,9 @@ rules:
   # Descending specificity false positives with SCSS nesting
   no-descending-specificity: null
 
+  # SCSS compiler does not support CSS4 space-separated color notation
+  color-function-notation: null
+  alpha-value-notation: null
+
   # Allow // single-line comments
   scss/double-slash-comment-empty-line-before: null
