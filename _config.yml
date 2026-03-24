@@ -1,5 +1,8 @@
 title: "Pyth3rEx"
-description: ""
+description: >-
+  Security research, red teaming, reconnaissance, and operational notes
+  by Pyth3rEx. Covering adversarial tooling, infrastructure, and OSINT.
+author: Pyth3rEx
 baseurl: ""
 url: "https://Pyth3rEx.github.io"
 
@@ -9,6 +12,7 @@ permalink: /blog/:year/:month/:day/:title/
 plugins:
   - jekyll-feed
   - jekyll-seo-tag
+  - jekyll-sitemap
 
 # Exclude from build
 exclude:

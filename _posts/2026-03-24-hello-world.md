@@ -2,6 +2,7 @@
 layout: post
 title: "Hello World"
 date: 2026-03-24
+tags: [security, red-team, osint]
 ---
 
 First post. This blog will cover security research, tooling, and operational topics —

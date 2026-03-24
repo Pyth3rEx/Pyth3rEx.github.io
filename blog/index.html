@@ -31,7 +31,7 @@ permalink: /blog/
         <p class="post-card-excerpt">
           {{ post.excerpt | strip_html | truncatewords: 28 }}
         </p>
-        <a class="post-card-read" href="{{ post.url | relative_url }}">read &rarr;</a>
+        <a class="post-card-read" href="{{ post.url | relative_url }}">Read &rarr;</a>
       </article>
     {% endfor %}
   {% endif %}
