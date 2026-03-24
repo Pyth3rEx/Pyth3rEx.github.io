@@ -73,7 +73,9 @@ full control.
 
 Calling `bank:withdraw(100)` outside the normal UI flow goes through without issue. Clean log
 entry, money received, no flags raised — from the middle of the Sandy Shores desert. The
-service[^1] is vulnerable. So we keep looking.
+service[^1] is vulnerable.
+
+So let's put on our hacker hoodies and start thinking red:
 
 ```lua
 -- server.lua
@@ -100,7 +102,7 @@ This is full compromise. In a red team engagement this is a failed audit.
 
 # Remediation
 
-👏 DON'T 👏 TRUST 👏 THE 👏 USER 👏
+**👏 DON'T 👏 TRUST 👏 THE 👏 USER 👏**
 
 ## Scope your client code
 
@@ -131,7 +133,7 @@ account receiving transfers from twenty different players in thirty seconds? Fla
 
 ---
 
-# Security as a headspace
+# Security as a headspace (SaaH)
 
 The fixes are not complex. Here is the original `bank:withdraw` handler with the four principles
 applied — the diff in code is small; the diff in exposure is everything.
@@ -197,7 +199,7 @@ Three things worth naming explicitly:
   stylistic — the constant is the reference point, the input is what gets tested against it.[^5]
 
 - **Layered validation.** Not a single gate — a sequence of independent filters: type, range,
-  context, authorization. A bypass of one doesn't collapse the rest.
+  context, authorization. Every single check needs to pass to get to the next layer while a single negative will drop the request straight to the bin.
 
 ---
 
@@ -219,13 +221,7 @@ The gap between exposed and defensible is a few lines of Lua and the decision to
 as what it is: a networked application that accepts untrusted input.
 
 Server events are the most direct entry point — one handler, one attacker, one payload at a time.
-Part 2 is a different shape of problem. FiveM embeds a full Chromium browser inside the game
-client — custom UIs, inventory menus, admin panels, all built in HTML and JavaScript. That browser
-has a message bridge directly into Lua, and the game gave it access to native engine functions.
-A developer who renders a player-controlled string with `innerHTML` instead of `textContent`
-doesn't expose one handler. They expose every client that opens that menu, simultaneously, to
-code execution — and the escalation path from there goes places that have nothing to do with
-in-game economy.
+Part 2 is a different shape of problems.
 
 ---
 
