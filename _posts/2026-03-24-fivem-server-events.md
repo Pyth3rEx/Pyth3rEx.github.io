@@ -3,6 +3,8 @@ layout: post
 title: "FiveM Security, Part 1: Your Server Events Are a Security Hole"
 date: 2026-03-24
 toc: true
+series: "FiveM Security"
+series_part: 1
 tags: [
   fivem, fivem-security, gta-roleplay, cfx,
   lua, lua-security, server-events, event-validation,
@@ -136,7 +138,7 @@ Flag it. An account receiving transfers from twenty different players in thirty 
 
 ---
 
-# Security as a headspace
+# Security as a headspace (SaaH)
 
 The fixes are not complex. Here is the original `bank:withdraw` handler with the four principles
 applied — the diff in code is small; the diff in exposure is everything.

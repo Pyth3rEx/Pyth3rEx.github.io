@@ -12,27 +12,66 @@ permalink: /blog/
   {% if site.posts.size == 0 %}
     <p class="empty">// no posts yet</p>
   {% else %}
+    {% assign seen_series = "" | split: "" %}
     {% for post in site.posts %}
-      <article class="post-card">
-        <div class="post-card-meta">
-          <time>{{ post.date | date: "%Y-%m-%d" }}</time>
-          <span class="meta-sep">/</span>
-          {% assign words = post.content | number_of_words %}
-          {% assign minutes = words | divided_by: 200 %}
-          {% if minutes < 1 %}
-            <span>~1 min</span>
-          {% else %}
-            <span>~{{ minutes }} min</span>
-          {% endif %}
-        </div>
-        <h2 class="post-card-title">
-          <a href="{{ post.url | relative_url }}">{{ post.title }}</a>
-        </h2>
-        <p class="post-card-excerpt">
-          {{ post.excerpt | strip_html | truncatewords: 28 }}
-        </p>
-        <a class="post-card-read" href="{{ post.url | relative_url }}">Read &rarr;</a>
-      </article>
+      {% if post.series %}
+        {% unless seen_series contains post.series %}
+          {% assign seen_series = seen_series | push: post.series %}
+          {% assign series_posts = site.posts | where: "series", post.series | sort: "series_part" %}
+          <div class="series-block">
+            <div class="series-header">
+              <span class="series-label">series</span>
+              <span class="series-title">{{ post.series }}</span>
+              <span class="series-count">{{ series_posts.size }} parts</span>
+            </div>
+            <ol class="series-parts">
+              {% for sp in series_posts %}
+                <li class="series-part">
+                  <div class="series-part-meta">
+                    <time>{{ sp.date | date: "%Y-%m-%d" }}</time>
+                    <span class="meta-sep">/</span>
+                    {% assign words = sp.content | number_of_words %}
+                    {% assign minutes = words | divided_by: 200 %}
+                    {% if minutes < 1 %}
+                      <span>~1 min</span>
+                    {% else %}
+                      <span>~{{ minutes }} min</span>
+                    {% endif %}
+                  </div>
+                  <div class="series-part-title">
+                    <span class="series-part-num">{{ sp.series_part }}.</span>
+                    <a href="{{ sp.url | relative_url }}">{{ sp.title }}</a>
+                  </div>
+                  {% if sp.excerpt %}
+                    <p class="series-part-excerpt">{{ sp.excerpt | strip_html | truncatewords: 22 }}</p>
+                  {% endif %}
+                </li>
+              {% endfor %}
+            </ol>
+          </div>
+        {% endunless %}
+      {% else %}
+        <article class="post-card">
+          <div class="post-card-meta">
+            <time>{{ post.date | date: "%Y-%m-%d" }}</time>
+            <span class="meta-sep">/</span>
+            {% assign words = post.content | number_of_words %}
+            {% assign minutes = words | divided_by: 200 %}
+            {% if minutes < 1 %}
+              <span>~1 min</span>
+            {% else %}
+              <span>~{{ minutes }} min</span>
+            {% endif %}
+          </div>
+          <h2 class="post-card-title">
+            <a href="{{ post.url | relative_url }}">{{ post.title }}</a>
+          </h2>
+          <p class="post-card-excerpt">
+            {{ post.excerpt | strip_html | truncatewords: 28 }}
+          </p>
+          <a class="post-card-read" href="{{ post.url | relative_url }}">Read &rarr;</a>
+        </article>
+      {% endif %}
     {% endfor %}
   {% endif %}
 </div>
