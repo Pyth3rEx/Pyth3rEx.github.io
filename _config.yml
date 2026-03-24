@@ -7,6 +7,9 @@ baseurl: ""
 url: "https://Pyth3rEx.github.io"
 
 theme: minima
+
+kramdown:
+  input: GFM
 permalink: /blog/:year/:month/:day/:title/
 
 plugins:
