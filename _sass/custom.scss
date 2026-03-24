@@ -369,10 +369,20 @@ h1.page-title {
 
 // ── Table of contents ──────────────────────────────────────────────────────────
 .post-toc {
+  display: none;
+  position: fixed;
+  top: 5rem;
+  left: calc(50vw - 580px);
+  width: 180px;
+  max-height: calc(100vh - 6rem);
+  overflow-y: auto;
+  font-size: 0.775rem;
   border-left: 2px solid $bg-border;
-  padding: 0.75rem 0 0.75rem 1.25rem;
-  margin-bottom: 2.5rem;
-  font-size: 0.825rem;
+  padding-left: 1rem;
+
+  @media (min-width: 1200px) {
+    display: block;
+  }
 
   ul {
     list-style: none;
@@ -381,20 +391,52 @@ h1.page-title {
   }
 
   li {
-    margin: 0.3rem 0;
+    margin: 0.35rem 0;
 
-    &.toc-h2 { padding-left: 1rem; }
+    &.toc-h2 { padding-left: 0.85rem; }
   }
 
   a {
     color: $text-muted;
     text-decoration: none;
     transition: color 0.15s ease;
+    display: block;
+    line-height: 1.4;
 
     &:hover { color: $accent; }
     &:visited { color: $text-muted; }
     &:visited:hover { color: $accent; }
+
+    &.toc-active {
+      color: $accent;
+      text-decoration: overline;
+      text-decoration-color: $accent;
+    }
   }
+}
+
+// ── Back to top ─────────────────────────────────────────────────────────────────
+.back-to-top {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  background: $bg-secondary;
+  color: $text-muted;
+  border: 1px solid $bg-border;
+  font-family: $font;
+  font-size: 0.875rem;
+  padding: 0.35rem 0.6rem;
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease, color 0.15s ease;
+
+  &.visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  &:hover { color: $accent; }
 }
 
 // ── Task list (checklist) ───────────────────────────────────────────────────────

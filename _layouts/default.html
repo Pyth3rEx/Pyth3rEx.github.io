@@ -34,6 +34,8 @@
     </div>
   </main>
 
+  <button class="back-to-top" id="back-to-top" aria-label="Back to top">↑</button>
+
   <script>
     document.querySelectorAll('div.highlight').forEach(function(block) {
       var btn = document.createElement('button');
@@ -57,17 +59,43 @@
       var headings = document.querySelectorAll('.post-content h1, .post-content h2');
       if (headings.length > 0) {
         var ul = document.createElement('ul');
+        var tocLinks = [];
         headings.forEach(function(h) {
           var li = document.createElement('li');
           li.className = 'toc-' + h.tagName.toLowerCase();
           var a = document.createElement('a');
           a.href = '#' + h.id;
           a.textContent = h.textContent;
+          a.dataset.id = h.id;
           li.appendChild(a);
           ul.appendChild(li);
+          tocLinks.push(a);
         });
         toc.appendChild(ul);
+
+        function updateActive() {
+          var scrollPos = window.scrollY + 80;
+          var current = null;
+          headings.forEach(function(h) {
+            if (h.offsetTop <= scrollPos) current = h.id;
+          });
+          tocLinks.forEach(function(a) {
+            a.classList.toggle('toc-active', a.dataset.id === current);
+          });
+        }
+        window.addEventListener('scroll', updateActive);
+        updateActive();
       }
+    }
+
+    var backToTop = document.getElementById('back-to-top');
+    if (backToTop) {
+      window.addEventListener('scroll', function() {
+        backToTop.classList.toggle('visible', window.scrollY > 200);
+      });
+      backToTop.addEventListener('click', function() {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
     }
   </script>
 
