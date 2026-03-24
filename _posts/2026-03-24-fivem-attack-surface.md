@@ -134,10 +134,152 @@ it. An account receiving transfers from twenty different players in thirty secon
 
 # Section 2 — The NUI / Web Layer
 
-- NUI is a Chromium-based browser embedded in the client with a bridge to Lua
-- Risk: XSS in NUI executes in a privileged context with access to the message bridge
-- Common pattern: resources rendering player-controlled strings (names, messages) via innerHTML
-- Mitigation: textContent over innerHTML, Content Security Policy, minimal NUI bridge exposure
+FiveM's NUI system is a Chromium browser running inside the game client. Developers build custom UIs
+with HTML, CSS, and JavaScript — inventory menus, HUDs, admin panels, ticket queues. The stack is
+standard. The attack surface is standard. If you have done web security before, you already know the
+attack. The question is what the context makes possible.
+
+## Web security in a game is worse
+
+In a normal browser, XSS is bounded. The sandbox limits system access. Same-origin policy restricts
+what injected JavaScript can reach. Exfiltrating a session cookie is the ceiling for most web XSS.
+
+NUI does not have that ceiling. The Chromium instance runs inside a process that has direct, designed
+access to the game engine. There is no boundary between the web layer and the game layer — that
+boundary was intentionally removed so that JavaScript can communicate with Lua and Lua can communicate
+with JavaScript. The same design choice that makes custom UIs possible is what makes XSS here
+categorically worse than XSS in a web app.
+
+## The bridge
+
+The communication mechanism is worth understanding before the escalation. Two functions carry traffic
+across the boundary:
+
+- `SendNUIMessage` — Lua to JavaScript. Sends a JSON object into the browser, received by a
+  `window.addEventListener('message', ...)` handler in JS.
+- `RegisterNUICallback` — JavaScript to Lua. JS makes an HTTP POST to
+  `https://${GetParentResourceName()}/callbackName`; the registered Lua handler receives the body.
+
+Data flows in both directions. A payload that lands in the browser can use `RegisterNUICallback` to
+send data back to Lua — and client-side Lua has access to game state, player data, and game
+functions. The bridge is the mechanism. Everything below is what happens when untrusted input reaches
+the DOM on the wrong side of it.
+
+## The vulnerable pattern
+
+The vulnerable pattern is one line:
+
+```js
+// nui/inventory.js
+element.innerHTML = itemDescription
+```
+
+`itemDescription` arrived from the server via `SendNUIMessage`. The developer trusted it. That trust
+is misplaced — the data ultimately originates from player input, a database that players write to,
+or a server-side script that handles player-controlled strings.
+
+The attacker sets their character name, their item name, or their support ticket body to a payload.
+Something like an image tag with an error handler that loads and evaluates a remote script. The
+payload is innocuous-looking. It sits in the database. It waits.
+
+> **Note:** Specific payload syntax is intentionally omitted. This is a documented class of
+> vulnerability — the goal is to make the attack surface legible, not to provide a tutorial.
+
+## Step one: proof of concept on yourself
+
+Before targeting anyone, the attacker confirms the surface. They set a player-controlled field to a
+payload and then open the UI that renders it — their own inventory, their own player card. The
+payload fires on their own screen. DOM mutates. Nothing illegal happened; it is their own client.
+What they now know: the injection point exists, the browser evaluates it, the field is not sanitised.
+This is reconnaissance. Low stakes, high signal.
+
+## Step two: blind XSS against staff
+
+Staff panels are NUI too. Player reports, ban requests, ticket queues, admin dashboards — all
+rendered in a Chromium browser inside the game. If the attacker's payload is stored in something
+that staff view, the payload fires in the *staff member's* client when they open the relevant panel.
+The attacker may be offline. The attacker never sees it trigger. This is blind XSS: fire and forget.
+
+The payload includes a beacon — a `fetch` call to an attacker-controlled endpoint that fires on
+execution, passing along whatever is readable in the DOM at the time: staff member identifiers,
+pending ban records, current player list, session tokens if a web panel is embedded. The attacker
+gets an HTTP request. That request confirms execution and carries the exfiltrated data.
+
+The staff member opened a ticket. Nothing looked wrong.
+
+## Step three: stored XSS against all clients
+
+Same mechanism, no longer limited to staff. The payload is stored in something every player
+renders: item names, vehicle descriptions, gang tags, death notifications, chat messages. When any
+client opens the affected UI, the payload executes in their browser. One stored injection, every
+player who opens that menu, no further interaction required from the attacker.
+
+The attacker went offline after submitting the payload. The payload is still executing on new
+clients.
+
+## Step four: game control
+
+The JavaScript running in victim clients has access to `window.invokeNative`.[^6] This is a bridge
+to C++ game functions — the same functions the game engine uses internally. From injected JavaScript
+running in a victim's NUI: teleport the player, spawn or delete entities, trigger animations, call
+commands that would normally require server-side authorisation. The attacker is not sending a
+crafted server event anymore. They are calling game engine functions directly from inside the
+victim's client, without touching the server at all.
+
+The anticheat has no visibility into this. It is not a game modification. It is JavaScript executing
+inside a browser that the game provides.
+
+## Step five: machine control
+
+`window.invokeNative` is not the ceiling.
+
+The CEF instance running NUI is a browser. Browsers have APIs: clipboard read and write, microphone
+access, camera access. In a standard browser these prompt for permission. Inside the game client,
+the permission surface is different — prompts may not appear, or may appear in a context where the
+player dismisses them without understanding what they are approving.
+
+Beyond that: the CEF remote debug interface runs on `localhost:13172` while the game is open.[^7]
+Any process on the same machine can attach to it and inject code into the running browser context,
+or inspect and modify anything currently loaded. This is not an attacker capability — it is a
+developer tool. But it is exposed by default, and it is accessible to anything running locally.
+
+From a payload already executing in NUI: read local files via `fetch` against `file://` paths,
+exfiltrate stored credentials, drop content to disk if the browser context permits it. The attacker
+has moved from manipulating a game UI to running arbitrary code on the victim's operating system.
+
+## The end state
+
+One stored payload. Every client that rendered the affected UI executed arbitrary code on a real
+machine. Those machines have filesystems, credentials, and network access. They are not sandboxed
+by anything the game provides.
+
+On the server side: if the payload reaches a rendering context that has server access — an admin
+web panel, a database management UI, anything that renders stored player data in a browser sitting
+on the server host — the escalation path continues to the server machine. RCE. Privilege escalation.
+Lateral movement into whatever network the server is on.
+
+This started with a developer using `innerHTML` instead of `textContent`.
+
+## Fixing the NUI layer
+
+**`textContent` over `innerHTML`** — if you are not rendering HTML, do not invoke the HTML parser.
+One substitution eliminates this entire class of vulnerability for text content.
+
+**DOMPurify if HTML is genuinely required** — not a regex. Tag-stripping with a regular expression
+is bypassable; a proper sanitiser understands the DOM tree and removes dangerous constructs
+without breaking legitimate markup.
+
+**Content Security Policy** — add a CSP to NUI resource HTML files. Restrict inline script
+execution and limit which origins `fetch` can reach. This does not prevent injection, but it
+severs the fetch-eval chain that turns reflected input into remote code execution.
+
+**Treat `RegisterNUICallback` data as hostile** — apply the same principle from Section 1. Data
+arriving from the NUI layer is untrusted. Validate type, range, and plausibility in the Lua handler
+before acting on it. The bridge runs in both directions; the input validation obligation runs in
+both directions.
+
+**Minimal bridge exposure** — only register the callbacks you need. Each registered callback is an
+attack surface; an unnecessary one is an unnecessary risk.
 
 ---
 
@@ -323,3 +465,12 @@ receive a report from the IRS... or worse.
 [^5]: In languages where `=` is assignment and `==` is comparison — C, JavaScript, PHP — writing
     the constant on the left turns an accidental `=` into a compile-time or runtime error rather
     than a silent bug. The pattern originates there; in Lua it is purely a readability convention.
+
+[^6]: `window.invokeNative` access has been partially restricted in newer CitizenFX builds. The
+    restriction is not complete or consistent across resource contexts, and the underlying
+    architecture — a JS-to-game-engine bridge — remains. Treat it as present until confirmed absent.
+
+[^7]: The CEF remote debug port on `localhost:13172` is a developer tool, not a vulnerability in
+    itself. It is exposed by default while the game runs and is accessible to any local process.
+    On a shared host or a machine that has already been partially compromised, it becomes a
+    reliable pivot point. See the Cfx.re community discussion on CEF debug tooling for context.
