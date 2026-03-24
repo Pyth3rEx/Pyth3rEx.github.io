@@ -16,3 +16,7 @@ end
 
 gem "wdm", "~> 0.1", platforms: %i[mingw x64_mingw mswin]
 gem "webrick", "~> 1.8"
+
+group :development do
+  gem "html-proofer", "~> 5.0"
+end

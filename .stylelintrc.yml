@@ -1,0 +1,26 @@
+extends:
+  - stylelint-config-standard-scss
+
+rules:
+  # Allow unquoted font family names in stacks (monospace, sans-serif)
+  font-family-name-quotes: null
+
+  # SCSS variables: no required empty line before
+  scss/dollar-variable-empty-line-before: null
+
+  # Allow comments adjacent to rules without empty lines
+  comment-empty-line-before: null
+
+  # Allow nested selectors without empty line before
+  rule-empty-line-before:
+    - always-multi-line
+    - except:
+        - first-nested
+      ignore:
+        - after-comment
+
+  # Declaration block: no required empty line before
+  declaration-empty-line-before: null
+
+  # Allow // single-line comments
+  scss/double-slash-comment-empty-line-before: null

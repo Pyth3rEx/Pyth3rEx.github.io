@@ -1,0 +1,9 @@
+{
+  "name": "pyth3rex-github-io",
+  "private": true,
+  "devDependencies": {
+    "markdownlint-cli": "^0.43.0",
+    "stylelint": "^16.0.0",
+    "stylelint-config-standard-scss": "^13.0.0"
+  }
+}

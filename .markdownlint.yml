@@ -1,0 +1,16 @@
+default: true
+
+# Line length — allow longer lines (URLs, tables)
+MD013:
+  line_length: 120
+  code_blocks: false
+  tables: false
+
+# Inline HTML — allowed (Jekyll front matter, custom elements)
+MD033: false
+
+# First line heading — not required (posts use front matter title)
+MD041: false
+
+# Ordered list style — allow any
+MD029: false

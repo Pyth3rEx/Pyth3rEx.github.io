@@ -1,0 +1,17 @@
+extends: default
+
+rules:
+  line-length:
+    max: 120
+    level: warning
+
+  # GitHub Actions uses 'on:' as a key which triggers truthy warnings
+  truthy:
+    allowed-values: ["true", "false"]
+    check-keys: false
+
+  # Allow 2-space indent (GitHub Actions standard)
+  indentation:
+    spaces: 2
+    indent-sequences: true
+    check-multi-line-strings: false

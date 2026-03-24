@@ -1,0 +1,65 @@
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: ["**"]
+
+jobs:
+  # ── Conventional commit enforcement ─────────────────────────────────────────
+  commitlint:
+    name: Commit messages
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: wagoid/commitlint-github-action@v6
+
+  # ── Linting ──────────────────────────────────────────────────────────────────
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "lts/*"
+
+      - name: Install JS deps
+        run: npm install
+
+      - name: Markdownlint
+        run: npx markdownlint-cli "**/*.md" --ignore node_modules --ignore _site --ignore vendor
+
+      - name: Stylelint
+        run: npx stylelint "_sass/**/*.scss" "assets/css/**/*.scss"
+
+      - name: YAML lint
+        run: |
+          pip install yamllint --quiet
+          yamllint -c .yamllint.yml _config.yml .github/
+
+  # ── Build & HTML proof ───────────────────────────────────────────────────────
+  build:
+    name: Build & HTML proof
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.3"
+          bundler-cache: true
+
+      - name: Build site
+        run: bundle exec jekyll build
+
+      - name: HTML proof
+        run: |
+          bundle exec htmlproofer _site \
+            --disable-external \
+            --ignore-urls "/^#/" \
+            --no-enforce-https
