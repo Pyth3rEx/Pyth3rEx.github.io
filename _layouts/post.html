@@ -13,6 +13,7 @@ layout: default
   </div>
 
   <nav class="post-nav">
+    <a class="post-back" href="{{ '/blog' | relative_url }}">&larr; Back</a>
     {% if page.previous.url %}
       <a class="prev" href="{{ page.previous.url | relative_url }}">&larr; {{ page.previous.title }}</a>
     {% endif %}
@@ -20,6 +21,4 @@ layout: default
       <a class="next" href="{{ page.next.url | relative_url }}">{{ page.next.title }} &rarr;</a>
     {% endif %}
   </nav>
-
-  <a class="post-back" href="{{ '/blog' | relative_url }}">&larr; Back</a>
 </article>
