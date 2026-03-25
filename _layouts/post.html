@@ -27,14 +27,14 @@ layout: default
   <nav class="post-nav">
     <a class="post-back" href="{{ '/blog' | relative_url }}">&larr; Back</a>
     <div class="post-nav-siblings">
-      {% if page.next.url %}
-        <a class="prev" href="{{ page.next.url | relative_url }}">&larr; {{ page.next.title }}</a>
+      {% if page.previous.url %}
+        <a class="prev" href="{{ page.previous.url | relative_url }}">&larr; {{ page.previous.title }}</a>
       {% endif %}
       {% if page.previous.url and page.next.url %}
         <span class="nav-sep">|</span>
       {% endif %}
-      {% if page.previous.url %}
-        <a class="next" href="{{ page.previous.url | relative_url }}">{{ page.previous.title }} &rarr;</a>
+      {% if page.next.url %}
+        <a class="next" href="{{ page.next.url | relative_url }}">{{ page.next.title }} &rarr;</a>
       {% endif %}
     </div>
   </nav>
