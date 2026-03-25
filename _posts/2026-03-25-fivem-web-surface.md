@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "The web inside FiveM: From browser to full remote control"
-date: 2026-03-24
+date: 2026-03-25
 toc: true
 series: "FiveM Security"
 series_part: 2
@@ -80,7 +80,7 @@ send data back to Lua — and client-side Lua has access to game state, player d
 functions. The bridge is the mechanism. Everything below is what happens when untrusted input reaches
 the DOM on the wrong side of it.
 
-> **Note:** Also notice the similarity with the vulnerabilities mentioned in Part 1? They also apply here. If you missed it read about it [here](/blog/2026/03/24/fivem-server-events/).
+> **Note:** Also notice the similarity with the vulnerabilities mentioned in Part 1? They also apply here. If you missed it, read about it [here](/blog/2026/03/24/fivem-server-events/).
 
 # Case study
 
@@ -128,7 +128,7 @@ assign metadata to the welcome guide handed out on character creation.
 Setting this as the item's metadata lets us test locally — no other player is affected. On inventory
 open, a `Vulnerable` popup appears in the UI layer. The service is vulnerable.
 
-## Blind XSS
+### Blind XSS
 
 The inventory is not the only injection point. Admin reports are NUI too — player reports, ban
 requests, ticket queues. A payload stored in a report body won't visibly render as a script; the
@@ -191,7 +191,7 @@ enough it can scan, detect, and pivot autonomously. Let's see what's in the DOM.
 ```
 
 Convenient: the moment I ran my recon payload was the same instant I received my 15-minute
-in-game paycheck. That notification was loaded in my DOM[^6]. Oddly curious.
+in-game paycheck. That notification was loaded in my DOM[^3]. Oddly curious.
 
 After digging into how FiveM handles NUI, the picture becomes clear. FiveM isolates resources in
 separate iframes — they shouldn't be able to see each other's DOM. But many servers run a
@@ -212,31 +212,21 @@ A generic pass-through — routes any callback to its originating resource witho
 is a wide pivot surface. Every resource on the server with a registered callback is now reachable
 from our injection point.
 
-The opening we are looking for is `window.invokeNative`[^7], which exposes game engine functions
+The opening we are looking for is `window.invokeNative`[^4], which exposes game engine functions
 directly to JavaScript running in NUI.
 
-## Step 7: Exfiltrate
-
----
----
----
----
----
-
-
-## Step four: game control
-
-The JavaScript running in victim clients has access to `window.invokeNative`.[^6] This is a bridge
-to C++ game functions — the same functions the game engine uses internally. From injected JavaScript
-running in a victim's NUI: teleport the player, spawn or delete entities, trigger animations, call
-commands that would normally require server-side authorisation. The attacker is not sending a
-crafted server event anymore. They are calling game engine functions directly from inside the
-victim's client, without touching the server at all.
+From injected JavaScript running in a victim's NUI: teleport the player, spawn or delete entities,
+trigger animations, call commands that would normally require server-side authorisation. The attacker
+is not sending a crafted server event anymore. They are calling game engine functions directly from
+inside the victim's client, without touching the server at all.
 
 The anticheat has no visibility into this. It is not a game modification. It is JavaScript executing
 inside a browser that the game provides.
 
-## Step five: machine control
+## Step 7: Exfiltrate
+
+> **Note:** This section is deliberately vague and leans toward speculation rather than demonstration,
+> for obvious reasons. Keep an open mind.
 
 `window.invokeNative` is not the ceiling.
 
@@ -245,57 +235,159 @@ access, camera access. In a standard browser these prompt for permission. Inside
 the permission surface is different — prompts may not appear, or may appear in a context where the
 player dismisses them without understanding what they are approving.
 
-Beyond that: the CEF remote debug interface runs on `localhost:13172` while the game is open.[^8]
+Beyond that: the CEF remote debug interface runs on `localhost:13172` while the game is open.[^5]
 Any process on the same machine can attach to it and inject code into the running browser context,
 or inspect and modify anything currently loaded. This is not an attacker capability — it is a
-developer tool. But it is exposed by default, and it is accessible to anything running locally.
+developer tool. But it is exposed by default, and accessible to anything running locally.
 
-From a payload already executing in NUI: read local files via `fetch` against `file://` paths,
-exfiltrate stored credentials, drop content to disk if the browser context permits it. The attacker
-has moved from manipulating a game UI to running arbitrary code on the victim's operating system.
+> **Note:** The activation and blocking of debug services on FiveM is not well documented. Most will
+> argue that if you don't enable the tools, they aren't enabled — but some claim it is possible to
+> force or bypass their activation. The documentation is thin; the threat model shouldn't assume the
+> default is safe.
 
-## The end state
+With a payload executing in the NUI context and a foothold on the debug interface, the attacker can
+operate at OS level — and they no longer need to be connected to the server. Reading local files via
+`fetch` against `file://` paths, exfiltrating stored credentials, or dropping content to disk are
+all within reach. The attacker has moved from manipulating a game UI to running arbitrary code on
+the victim's operating system.
 
-One stored payload. Every client that rendered the affected UI executed arbitrary code on a real
-machine. Those machines have filesystems, credentials, and network access. They are not sandboxed
-by anything the game provides.
+---
 
-On the server side: if the payload reaches a rendering context that has server access — an admin
-web panel, a database management UI, anything that renders stored player data in a browser sitting
-on the server host — the escalation path continues to the server machine. RCE. Privilege escalation.
-Lateral movement into whatever network the server is on.
+# The end state
+
+A detective opened an evidence bag.
+
+The metadata field rendered without sanitisation. Our payload executed in their NUI context. It
+rewrote the bag's description — they saw whatever we wanted them to see. It fired a callback and
+transferred the bag to our inventory. It scanned the DOM, found the centralised notification system,
+and mapped every registered callback on the server. It called `window.invokeNative` — directly,
+without touching the server — and issued game engine commands under their identity. Then it reached
+the debug interface and read files off their machine.
+
+They were just doing their job. Opening evidence, like every shift.
+
+The payload had been sitting in that bag for days. We were offline. It fires on every detective who
+opens it. The server saw none of this — no unusual events, no suspicious connections, nothing to
+flag. The only trace is a text field in a database, waiting for the next person to open the right
+menu.
 
 This started with a developer using `innerHTML` instead of `textContent`.
 
-## Fixing the NUI layer
+# Fixing the NUI layer
 
-**`textContent` over `innerHTML`** — if you are not rendering HTML, do not invoke the HTML parser.
-One substitution eliminates this entire class of vulnerability for text content.
+The same three principles from Part 1 apply here. The bridge runs in both directions; the
+obligation runs in both directions.
 
-**DOMPurify if HTML is genuinely required** — not a regex. Tag-stripping with a regular expression
-is bypassable; a proper sanitiser understands the DOM tree and removes dangerous constructs
-without breaking legitimate markup.
+**The render side.**
 
-**Content Security Policy** — add a CSP to NUI resource HTML files. Restrict inline script
-execution and limit which origins `fetch` can reach. This does not prevent injection, but it
-severs the fetch-eval chain that turns reflected input into remote code execution.
+The JavaScript that displays player-controlled data is the first gate. By default, it does nothing
+unless the data passes. `textContent` is the default — it does not invoke the HTML parser, so
+injected markup is inert. If HTML rendering is genuinely required, DOMPurify runs first. No
+exceptions for "trusted" sources: if the data touched the database and a player wrote it, it is
+untrusted.
 
-**Treat `RegisterNUICallback` data as hostile** — apply the same principle from Section 1. Data
-arriving from the NUI layer is untrusted. Validate type, range, and plausibility in the Lua handler
-before acting on it. The bridge runs in both directions; the input validation obligation runs in
-both directions.
+```js
+// html/app.js
+function renderDescription(data) {
+  var descEl = document.querySelector('[data-component="evidence-description"]');
+  if (null !== descEl) {
+  
+    // Type check
+    if ('string' === typeof data.description) {
+    
+      // Render — textContent, never innerHTML
+      descEl.textContent = data.description;
+    }
+  }
+  
+  return;
+}
+```
 
-**Minimal bridge exposure** — only register the callbacks you need. Each registered callback is an
-attack surface; an unnecessary one is an unnecessary risk.
+Default to negative. The function does nothing unless the element exists and the data is a string.
+No render, no side effect.
+
+**The callback side.**
+
+Data arriving from the NUI layer is untrusted. A payload executing in the browser can call any
+registered callback with any body it constructs. The Lua handler is the second gate — same layered
+pattern as Part 1.
+
+```lua
+-- client.lua
+RegisterNUICallback('inventory:transferEvidence', function(data, cb)
+
+    -- Type check
+    if "string" == type(data.itemId) and "number" == type(data.target) then
+    
+        -- Sanity check
+        if 64 > #data.itemId and 1 <= data.target then
+        
+            -- Context check
+            if true == isValidItem(data.itemId) and true == DoesEntityExist(data.target) then
+            
+                -- Perform the action
+                TriggerServerEvent('inventory:transferEvidence', data.itemId, data.target)
+                cb({ success = true })
+                return
+            end
+        end
+    end
+
+    cb({ success = false })
+    return
+end)
+```
+
+Default to negative. Silent `cb({ success = false })` and `return` on any failed check. The action
+— a server event — only fires when every layer passes.
+
+Three things worth naming explicitly:
+
+- **Default to negative.** Both sides of the bridge do nothing unless all conditions pass. No
+  render, no callback, no server event. Silent return.
+
+- **Layered validation.** Not a single guard — a sequence: type, sanity, context, then action.
+  Each layer is independent. A failure at any point drops the request.
+
+- **Minimal surface.** Only register the callbacks you need. The generic pass-through from Step 6
+  — routing any callback to any resource without validation — is the opposite of this. Each
+  registered callback is a decision; treat it like one.
+
+A Content Security Policy on NUI HTML files adds a fourth layer: restrict `script-src` to your
+own bundle and block inline execution. It does not prevent injection, but it severs the eval chain.
+A payload that cannot execute inline and cannot reach an external endpoint is significantly less
+useful, even if it lands.
 
 ---
 
 # Closing
 
+Part 1 was one attacker, one server, one payload at a time. This is worse.
 
-In a future post, we will cover what a breach actually costs — legally, financially, and personally.
-If this post reached someone running a server, send it to them. Better read a blog post than
-receive a report from the IRS... or worse.
+A single stored injection fires on every player who opens the affected UI — indefinitely, without
+the attacker being present, without the server seeing anything unusual. The surface is not just
+the server anymore. It is every client, every machine, every set of credentials sitting in a
+browser profile on the same computer running the game.
+
+Most servers won't notice. The tell is not an alert or a spike — it is a detective who lost their
+evidence bag and assumed it was a script bug. It is a staff member whose admin panel behaved
+strangely for a moment. It is a player who saw a notification they didn't expect. Or it's nothing
+at all. None of those get filed as security incidents. They get filed as bugs, or they don't get
+filed at all.
+
+The attacker doesn't need to be skilled. They need to find one field that renders without
+sanitisation and one developer who reached for `innerHTML` because it was easier. That field
+exists on most servers. That developer made that choice on most resources. The gap between exposed
+and defensible is `textContent`, a type check on a callback handler, and the decision to treat
+the NUI layer as what it is: a browser running untrusted input.
+
+Two posts in, we have covered the server and the clients. There is a third layer we haven't
+touched — the database. The same input that executes in a browser can execute in a query. Part 3
+is about what happens when untrusted data reaches SQL.
+
+If this reached someone running a server, send it to them. Their players' machines are not part
+of the game — until they are.
 
 ---
 
@@ -309,24 +401,15 @@ receive a report from the IRS... or worse.
     browsers have closed most of those paths — which is exactly what makes NUI's exposure notable:
     it reopens them by design.
 
-[^6]: FiveM isolates resources in separate iframes — theoretically preventing cross-resource
+[^3]: FiveM isolates resources in separate iframes — theoretically preventing cross-resource
     communication. In this example the resources share the same NUI via a centralised display
     script. Worth noting: even without a shared DOM, that doesn't prevent a payload from calling
     another resource's registered callbacks directly.
 
-[^7]: `window.invokeNative` is a CEF-exposed function specific to the FiveM client. It is
+[^4]: `window.invokeNative` is a CEF-exposed function specific to the FiveM client. It is
     undocumented officially but widely reverse-engineered by the community. Its availability and
     scope may vary across client versions.
 
-
-
-
-
-
-
-
-
-
-[^8]: The CEF remote debugging port (`13172` by default) is a Chromium DevTools Protocol endpoint.
+[^5]: The CEF remote debugging port (`13172` by default) is a Chromium DevTools Protocol endpoint.
     Any application on localhost can attach to it while the game is running. It is a standard
     developer tool, not a vulnerability — but its exposure is worth understanding in a threat model.
