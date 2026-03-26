@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "The web inside FiveM: From browser to full remote control"
-date: 2026-03-25
+date: 2026-03-26
 toc: true
 series: "FiveM Security"
 series_part: 2
