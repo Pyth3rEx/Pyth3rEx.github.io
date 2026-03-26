@@ -84,13 +84,13 @@ the DOM on the wrong side of it.
 
 # Case study
 
-## Step 1: noticing
+## Step 1: Noticing
 
 We join a new server — it's got open police slots, great. Playing around we notice evidence bags:
 placeable items like bullet casings that accept metadata comments, letting detectives add context
 to evidence later in an investigation. Let's dig.
 
-## Step 2: digging
+## Step 2: Digging
 
 The script is paid — no public source, documentation behind a paywall. A bit of OSINT surfaces an
 outdated leak: obfuscated code and a three-year-old user guide. The UI has changed and the feature
@@ -134,7 +134,7 @@ The inventory is not the only injection point. Admin reports are NUI too — pla
 requests, ticket queues. A payload stored in a report body won't visibly render as a script; the
 staff member opens what looks like a normal ticket. The payload fires in their client, under their
 permissions. They never see it execute. This is blind XSS: the attacker fires and goes offline.
-The payload does the rest.
+The payload does the rest, sometimes years later.
 
 ## Step 4: Persist via Stored XSS
 
