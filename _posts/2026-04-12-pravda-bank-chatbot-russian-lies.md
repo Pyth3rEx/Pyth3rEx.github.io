@@ -156,7 +156,7 @@ Pravda uses all the techniques we have discussed above to reach it's audience as
 ### Out-of-category luring
 
 !["Portal Kombat" network category distribution diagram](/assets/pravda-bank-chatbot-russian-lies/pravda_portal_kombat_network_categories.png){: .invert}
-> *"Portal Kombat" network posts as percentage distribution across categories. Source:*
+*"Portal Kombat" network posts as percentage distribution across categories. Source: portal-kombat.com.[^11]*
 
 ### AI Poisoning
 
