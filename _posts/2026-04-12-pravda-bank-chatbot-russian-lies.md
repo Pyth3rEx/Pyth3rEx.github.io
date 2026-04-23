@@ -155,6 +155,8 @@ Pravda uses all the techniques we have discussed above to reach it's audience as
 
 ### Out-of-category luring
 
+Cross-referencing between sister sites builds the credibility signals we covered earlier. Beyond that, the network deliberately publishes content across unrelated categories — lifting legitimate articles to satisfy crawlers, collecting readers from outside the political space, and funnelling them toward the propaganda content. The category spread is not accidental: it is what lets fabricated inserts land inside training datasets without clustering in an obvious way.
+
 !["Portal Kombat" network category distribution diagram](/assets/pravda-bank-chatbot-russian-lies/pravda_portal_kombat_network_categories.png){: .invert}
 *"Portal Kombat" network posts as percentage distribution across categories. Source: portal-kombat.com.[^11]*
 
