@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "PRAVDA - Your Bank's Chatbot Is Repeating Kremlin Lies"
-date: 2026-04-12
+date: 2026-04-26
 toc: true
 series: "Social Engineering & Manipulation"
 series_part: 1
