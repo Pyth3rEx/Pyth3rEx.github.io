@@ -15,9 +15,9 @@ tags: [
 ]
 ---
 
-<!-- markdownlint-disable MD013 -->
-
 You've never visited a Russian propaganda site. You've never clicked a suspicious link. But every time you chat with your bank's AI assistant, you might be getting served Kremlin talking points — and neither you nor the bank has any idea.
+
+<!-- markdownlint-disable MD013 -->
 
 ---
 
